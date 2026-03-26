@@ -127,9 +127,11 @@ function mx_boss_size_mm() = 5.5;
 function mx_cross_major_mm(clearance_mm) = 4.1 + clearance_mm;
 function mx_cross_minor_mm(clearance_mm) = 1.20 + clearance_mm * 0.8;
 
-function choc_slot_size_mm(clearance_mm) = [1.15 + clearance_mm * 0.7, 2.95 + clearance_mm * 0.8];
 function choc_slot_spacing_mm() = 5.70;
-function choc_boss_size_mm() = [1.7, 3.7];
+function choc_post_size_mm() = [1.15, 2.95];
+function choc_post_tip_size_mm() = [0.74, 2.54];
+function choc_post_corner_radius_mm() = 0.20;
+function choc_post_tip_height_mm(low_profile) = low_profile ? 0.40 : 0.45;
 
 function lip_height_mm() = 0.72;
 function print_preview_lift_mm(print_angle_deg, width_u, outer_family, low_profile) =
@@ -489,12 +491,29 @@ module mx_stem_boss(clearance_mm, low_profile) {
 module choc_stem_boss(clearance_mm, low_profile) {
     boss_h = stem_body_height_mm(low_profile, "choc_v1");
     spacing = choc_slot_spacing_mm();
-    post = [1.40 + clearance_mm * 0.18, 3.18 + clearance_mm * 0.20];
+    post = choc_post_size_mm();
+    tip = choc_post_tip_size_mm();
+    corner_r = choc_post_corner_radius_mm();
+    tip_h = min(choc_post_tip_height_mm(low_profile), boss_h - 0.02);
+    wafer_h = 0.04;
 
     for (x = [-spacing / 2, spacing / 2]) {
-        translate([x, 0, 0])
-            linear_extrude(height = boss_h)
-                rounded_rect(size = post, radius = 0.34, center = true);
+        translate([x, 0, 0]) {
+            hull() {
+                linear_extrude(height = wafer_h)
+                    rounded_rect(size = tip, radius = corner_r, center = true);
+
+                translate([0, 0, tip_h])
+                    linear_extrude(height = wafer_h)
+                        rounded_rect(size = post, radius = corner_r, center = true);
+            }
+
+            if (boss_h > tip_h) {
+                translate([0, 0, tip_h])
+                    linear_extrude(height = boss_h - tip_h)
+                        rounded_rect(size = post, radius = corner_r, center = true);
+            }
+        }
     }
 }
 
