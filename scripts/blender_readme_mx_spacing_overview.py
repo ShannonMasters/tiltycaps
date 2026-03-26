@@ -27,6 +27,7 @@ DETAIL_X_POSITIONS = (-36.0, 0.0, 36.0)
 DETAIL_OBJECT_Y = 0.0
 DETAIL_LABEL_Y = -16.5
 DETAIL_Z_ROTATION_DEG = -45.0
+OVERVIEW_LABEL_PERSPECTIVE_BLEND = 0.45
 
 
 def parse_args() -> argparse.Namespace:
@@ -256,6 +257,14 @@ def homing_path(directory: Path) -> Path:
     return directory / "r3-homing-3-dots.stl"
 
 
+def overview_label_x(label_x: float) -> float:
+    camera_y = README_CAMERA_LOCATION[1]
+    object_depth = abs(MAIN_ROW_Y - camera_y)
+    label_depth = abs(MAIN_LABEL_Y - camera_y)
+    perspective_scale = label_depth / object_depth
+    return label_x * (1.0 - (1.0 - perspective_scale) * OVERVIEW_LABEL_PERSPECTIVE_BLEND)
+
+
 def build_overview_scene(
     args: argparse.Namespace,
     keycap_material: bpy.types.Material,
@@ -273,7 +282,7 @@ def build_overview_scene(
 
         add_flat_text(
             body=row,
-            location=(x_positions[index], MAIN_LABEL_Y, 0.08),
+            location=(overview_label_x(x_positions[index]), MAIN_LABEL_Y, 0.08),
             size=3.3,
             material=text_material,
         )
