@@ -153,13 +153,15 @@ function shell_height_mm(row, low_profile) =
            row == "Thumb" ? (low_profile ? -0.08 : 0.00) : 0.06)
     ) * shell_height_scale();
 
+function saddle_depth_scale() = 1.18;
 function saddle_depth_mm(row, low_profile) =
     (low_profile ? 1.42 : 1.18)
     * (row == "R1" ? 0.94 :
        row == "R2" ? 1.02 :
        row == "R3" ? 1.06 :
        row == "R4" ? 0.98 :
-       row == "Thumb" ? 0.82 : 1.00);
+       row == "Thumb" ? 0.82 : 1.00)
+    * saddle_depth_scale();
 
 function shell_top_shift_mm(total_height, tilt_deg) = tan(tilt_deg) * total_height * 0.46;
 function shell_row_depth_bias_mm(row, low_profile) =
