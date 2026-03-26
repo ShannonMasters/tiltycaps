@@ -142,13 +142,16 @@ function shell_width_trim_mm(low_profile) = low_profile ? 2.40 : 1.70;
 function shell_depth_trim_mm(low_profile) = low_profile ? 2.40 : 1.50;
 function shell_width_mm(low_profile, outer_family) = base_cap_width_mm(1, outer_family) - shell_width_trim_mm(low_profile);
 function shell_depth_mm(low_profile, outer_family) = base_cap_depth_mm(outer_family) - shell_depth_trim_mm(low_profile);
+function shell_height_scale() = 1.20;
 function shell_height_mm(row, low_profile) =
-    (low_profile ? 4.80 : 6.35)
-    + (row == "R1" ? (low_profile ? 0.52 : 0.58) :
-       row == "R2" ? (low_profile ? 0.24 : 0.30) :
-       row == "R3" ? (low_profile ? 0.00 : 0.06) :
-       row == "R4" ? (low_profile ? 0.36 : 0.42) :
-       row == "Thumb" ? (low_profile ? -0.08 : 0.00) : 0.06);
+    (
+        (low_profile ? 4.80 : 6.35)
+        + (row == "R1" ? (low_profile ? 0.52 : 0.58) :
+           row == "R2" ? (low_profile ? 0.24 : 0.30) :
+           row == "R3" ? (low_profile ? 0.00 : 0.06) :
+           row == "R4" ? (low_profile ? 0.36 : 0.42) :
+           row == "Thumb" ? (low_profile ? -0.08 : 0.00) : 0.06)
+    ) * shell_height_scale();
 
 function saddle_depth_mm(row, low_profile) =
     (low_profile ? 1.42 : 1.18)
@@ -239,9 +242,9 @@ function saddle_rim_mm(row, low_profile) =
     * (row == "R3" ? 1.0 :
        row == "Thumb" ? 0.72 : 0.84);
 function row_mark_text(row) = row == "Thumb" ? "T" : row;
-function row_mark_depth_mm(low_profile) = low_profile ? 0.17 : 0.20;
+function row_mark_depth_mm(low_profile) = low_profile ? 0.20 : 0.23;
 function row_mark_size_mm(row, low_profile, outer_family, wall_mm) =
-    min(low_profile ? 2.0 : 2.4, cavity_opening_size(row, low_profile, outer_family, wall_mm)[0] * 0.165);
+    min(low_profile ? 2.15 : 2.55, cavity_opening_size(row, low_profile, outer_family, wall_mm)[0] * 0.178);
 function row_mark_offset_y_mm(row, low_profile, outer_family, wall_mm) =
     -cavity_opening_size(row, low_profile, outer_family, wall_mm)[1] * 0.28;
 function homing_enabled(homing_type) = homing_type != "None";
