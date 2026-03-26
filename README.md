@@ -17,7 +17,16 @@ Current scope:
 - `tiltycaps.scad` - single-file parameter entrypoint and generator source
 - `examples/*.scad` - representative example entrypoints
 - `scripts/generate_stls.py` - batch STL export into a consistent `stls/` directory tree
+- `scripts/render_readme_mx_spacing_overview.py` - temporary `out/` STL export plus Blender renders for the README lineup and R3 detail images
 - `scripts/validate.py` - STL export and mesh sanity checks
+
+![MX-spacing overview render](docs/readme-mx-spacing-overview.png)
+
+`R1` through `R4` plus `Thumb` in the MX-spacing shell, angled to show the row profiles more clearly. Regenerate it with `python3 scripts/render_readme_mx_spacing_overview.py`, which writes temporary typing-mode STLs under `out/readme-mx-spacing-overview/` and then renders the tracked `docs/readme-mx-spacing-overview.png` and `docs/readme-mx-spacing-r3-detail.png` assets with Blender.
+
+![MX-spacing R3 detail render](docs/readme-mx-spacing-r3-detail.png)
+
+Detail view: `R3` with `3 dots` homing, plus flipped Choc and MX stem undersides for the same MX-spacing shell.
 
 ## Quick Start
 
