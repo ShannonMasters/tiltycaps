@@ -1,6 +1,6 @@
 /* [Preset Selection] */
 
-// DSA-style row variant applied to the default shell.
+// SA-inspired row variant applied to the default low-profile shell.
 row = "R3"; // [R1, R2, R3, R4, Thumb]
 
 // Keycap outer footprint spacing, independent of the stem family.
@@ -76,10 +76,10 @@ function default_roof_mm() = 1.2;
 function default_clearance_mm() = 0.18;
 
 function row_base_tilt_deg(row) =
-    row == "R1" ? -14 :
-    row == "R2" ? -8 :
+    row == "R1" ? -20 :
+    row == "R2" ? -12 :
     row == "R3" ? 0 :
-    row == "R4" ? 10 :
+    row == "R4" ? 14 :
     row == "Thumb" ? -17 : 0;
 
 function row_height_bias_mm(row) =

@@ -5,7 +5,7 @@
 Current scope:
 
 - Smooth low-profile shell proportions and saddle sculpt
-- DSA-style row variants for `R1` through `R4`, plus a flatter `Thumb` profile
+- SA-inspired row variants for `R1` through `R4`, plus a flatter `Thumb` profile on the same low-profile shell
 - A `low_profile` toggle, defaulting to the compact low-profile shell
 - MX or Choc outer spacing, independent of the chosen stem
 - Choc and MX stem options that both hang from the cap interior
