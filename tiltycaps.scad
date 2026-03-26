@@ -172,21 +172,23 @@ function shell_row_depth_bias_mm(row, low_profile) =
        row == "R4" ? 0.34 :
        row == "Thumb" ? 0.16 : 0.00);
 
+function section_count() = 6;
+function section_top_idx() = section_count() - 1;
 function section_z_t(idx, low_profile) =
     (low_profile
-        ? [0.18, 0.34, 0.56, 0.78, 1.00]
-        : [0.00, 0.16, 0.38, 0.68, 1.00])[idx];
-function section_shift_t(idx) = [0.00, 0.08, 0.34, 0.74, 1.00][idx];
+        ? [0.18, 0.29, 0.43, 0.58, 0.74, 1.00]
+        : [0.00, 0.13, 0.28, 0.48, 0.74, 1.00])[idx];
+function section_shift_t(idx) = [0.00, 0.03, 0.12, 0.34, 0.72, 1.00][idx];
 function section_width_trim_mm(idx, low_profile) =
     (low_profile
-        ? [0.08, 0.10, 0.24, 0.72, 1.22]
-        : [0.00, 0.10, 0.26, 0.86, 1.46])[idx];
+        ? [0.08, 0.24, 0.62, 1.04, 1.24, 1.30]
+        : [0.00, 0.18, 0.48, 0.98, 1.42, 1.50])[idx];
 function section_depth_trim_mm(idx, low_profile) =
     (low_profile
-        ? [0.22, 0.36, 1.56, 2.92, 3.24]
-        : [0.00, 0.18, 0.56, 1.36, 2.06])[idx];
-function section_corner_radius_mm(idx) = [2.34, 2.58, 2.96, 3.36, 3.62][idx];
-function section_thickness_mm(idx) = idx == 4 ? 0.18 : 0.22;
+        ? [0.22, 0.64, 1.48, 2.56, 3.08, 3.24]
+        : [0.00, 0.28, 0.78, 1.40, 1.96, 2.06])[idx];
+function section_corner_radius_mm(idx) = [2.34, 2.50, 2.80, 3.18, 3.50, 3.62][idx];
+function section_thickness_mm(idx) = idx == section_top_idx() ? 0.18 : 0.22;
 
 function section_z_mm(idx, total_height, low_profile) = 0.10 + section_z_t(idx, low_profile) * total_height;
 function outer_section_size(idx, row, low_profile, outer_family) = [
@@ -312,7 +314,7 @@ module outer_shell(row, overall_tilt_deg, low_profile, outer_family) {
             thickness = 0.06
         );
 
-        for (idx = [0 : 4]) {
+        for (idx = [0 : section_top_idx()]) {
             section_wafer(
                 size = outer_section_size(idx, row, low_profile, outer_family),
                 radius = section_corner_radius_mm(idx),
@@ -338,7 +340,7 @@ module inner_cavity(row, overall_tilt_deg, low_profile, outer_family, stem_famil
             thickness = 0.20
         );
 
-        for (idx = [1 : 3]) {
+        for (idx = [1 : section_top_idx() - 1]) {
             section_wafer(
                 size = inner_section_size(idx, row, low_profile, outer_family, wall_mm),
                 radius = max(0.95, section_corner_radius_mm(idx) - wall_mm * 0.68),
@@ -349,10 +351,10 @@ module inner_cavity(row, overall_tilt_deg, low_profile, outer_family, stem_famil
         }
 
         section_wafer(
-            size = inner_section_size(4, row, low_profile, outer_family, wall_mm),
-            radius = max(0.90, section_corner_radius_mm(4) - wall_mm * 0.72),
+            size = inner_section_size(section_top_idx(), row, low_profile, outer_family, wall_mm),
+            radius = max(0.90, section_corner_radius_mm(section_top_idx()) - wall_mm * 0.72),
             z = cavity_top_z,
-            shift_y = top_shift * 0.76,
+            shift_y = top_shift * 0.80,
             thickness = 0.18
         );
     }
@@ -400,7 +402,7 @@ module saddle_cut(row, overall_tilt_deg, low_profile, outer_family) {
     tilt_deg = effective_tilt_deg(row, overall_tilt_deg);
     top_shift = shell_top_shift_mm(total_height, tilt_deg);
     saddle_mm = saddle_depth_mm(row, low_profile);
-    top_size = outer_section_size(4, row, low_profile, outer_family);
+    top_size = outer_section_size(section_top_idx(), row, low_profile, outer_family);
     saddle_rim = saddle_rim_mm(row, low_profile);
     bowl_size = [
         max(4.4, top_size[0] - saddle_rim * 2),
@@ -453,7 +455,7 @@ module homing_feature(row, overall_tilt_deg, low_profile, outer_family, homing_t
     tilt_deg = effective_tilt_deg(row, overall_tilt_deg);
     top_shift = shell_top_shift_mm(total_height, tilt_deg);
     saddle_mm = saddle_depth_mm(row, low_profile);
-    top_size = outer_section_size(4, row, low_profile, outer_family);
+    top_size = outer_section_size(section_top_idx(), row, low_profile, outer_family);
     saddle_rim = saddle_rim_mm(row, low_profile);
     dot_radius = homing_dot_radius_mm(low_profile, homing_scale);
     dot_height = homing_dot_height_mm(low_profile, homing_scale);
