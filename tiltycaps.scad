@@ -138,11 +138,11 @@ function print_preview_lift_mm(print_angle_deg, width_u, outer_family, low_profi
     cap_height_mm("R3", low_profile, outer_family) + base_cap_depth_mm(outer_family) * sin(print_angle_deg) * 0.6 + width_u;
 
 
-function shell_width_trim_mm(low_profile) = low_profile ? 2.40 : 1.70;
-function shell_depth_trim_mm(low_profile) = low_profile ? 2.40 : 1.50;
+function shell_width_trim_mm(low_profile) = 0.00;
+function shell_depth_trim_mm(low_profile) = 0.00;
 function shell_width_mm(low_profile, outer_family) = base_cap_width_mm(1, outer_family) - shell_width_trim_mm(low_profile);
 function shell_depth_mm(low_profile, outer_family) = base_cap_depth_mm(outer_family) - shell_depth_trim_mm(low_profile);
-function shell_height_scale() = 1.44;
+function shell_height_scale() = 1.656;
 function shell_height_mm(row, low_profile) =
     (
         (low_profile ? 4.80 : 6.35)
@@ -248,7 +248,7 @@ function saddle_rim_mm(row, low_profile) =
 function row_mark_text(row) = row == "Thumb" ? "T" : row;
 function row_mark_depth_mm(low_profile) = low_profile ? 0.20 : 0.23;
 function row_mark_size_mm(row, low_profile, outer_family, wall_mm) =
-    min(low_profile ? 2.15 : 2.55, cavity_opening_size(row, low_profile, outer_family, wall_mm)[0] * 0.178);
+    min(low_profile ? 2.30 : 2.70, cavity_opening_size(row, low_profile, outer_family, wall_mm)[0] * 0.190);
 function row_mark_offset_y_mm(row, low_profile, outer_family, wall_mm) =
     -cavity_opening_size(row, low_profile, outer_family, wall_mm)[1] * 0.28;
 function homing_enabled(homing_type) = homing_type != "None";
@@ -407,6 +407,16 @@ module saddle_cut(row, overall_tilt_deg, low_profile, outer_family) {
         max(4.4, top_size[1] - saddle_rim * 2)
     ];
     thumb_bowl_scale = row == "Thumb" ? [1.02, 1.08, 1.02] : [1.00, 1.00, 1.00];
+    front_sweep_y = -top_size[1] * (row == "Thumb" ? 0.14 : row == "R3" ? 0.18 : 0.20);
+    front_sweep_z = -saddle_mm * (row == "Thumb" ? 0.12 : 0.18);
+    front_sweep_scale = [
+        bowl_size[0] * (row == "Thumb" ? 0.90 : 0.96),
+        bowl_size[1] * (row == "Thumb" ? 0.42 : row == "R3" ? 0.52 : 0.46),
+        saddle_mm * (row == "Thumb" ? 0.90 : row == "R3" ? 1.10 : 1.00)
+    ];
+    rear_sweep_y = top_size[1] * 0.18;
+    rear_sweep_z = -saddle_mm * 0.16;
+    rear_sweep_scale = [bowl_size[0] * 0.94, bowl_size[1] * 0.50, saddle_mm * 1.00];
 
     translate([0, top_shift * 0.98, total_height + saddle_mm * 0.01])
         rotate([tilt_deg * 0.44, 0, 0])
@@ -425,6 +435,16 @@ module saddle_cut(row, overall_tilt_deg, low_profile, outer_family) {
                 translate([0, 0, saddle_mm * 0.02])
                     scale([bowl_size[0] * 1.08 * thumb_bowl_scale[0], bowl_size[1] * 0.88 * thumb_bowl_scale[1], saddle_mm * 0.42 * thumb_bowl_scale[2]])
                         sphere(r = 1, $fn = 72);
+
+                translate([0, front_sweep_y, front_sweep_z])
+                    scale(front_sweep_scale)
+                        sphere(r = 1, $fn = 72);
+
+                if (row == "R3") {
+                    translate([0, rear_sweep_y, rear_sweep_z])
+                        scale(rear_sweep_scale)
+                            sphere(r = 1, $fn = 72);
+                }
             }
 }
 
