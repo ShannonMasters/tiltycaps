@@ -17,6 +17,12 @@ SURFACE_Z_OFFSET = 0.45
 MAIN_ROW_Y = 6.0
 MAIN_LABEL_Y = -13.5
 MAIN_Z_ROTATION_DEG = 180.0
+OVERVIEW_CAMERA_LENS = 44
+DETAIL_CAMERA_LENS = 46
+README_CAMERA_LOCATION = (0, -138, 46)
+README_CAMERA_TARGET = (0, -2, 4)
+README_CROP_MIN_Y = 0.09
+README_CROP_MAX_Y = 0.84
 DETAIL_X_POSITIONS = (-36.0, 0.0, 36.0)
 DETAIL_OBJECT_Y = 0.0
 DETAIL_LABEL_Y = -16.5
@@ -178,6 +184,12 @@ def configure_scene(args: argparse.Namespace) -> tuple[bpy.types.Scene, bpy.type
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
     scene.render.filepath = str(args.output)
+    scene.render.use_border = True
+    scene.render.use_crop_to_border = True
+    scene.render.border_min_x = 0.0
+    scene.render.border_max_x = 1.0
+    scene.render.border_min_y = README_CROP_MIN_Y
+    scene.render.border_max_y = README_CROP_MAX_Y
 
     world = bpy.data.worlds.new("OverviewWorld")
     world.use_nodes = True
@@ -210,15 +222,11 @@ def configure_scene(args: argparse.Namespace) -> tuple[bpy.types.Scene, bpy.type
 
     camera_data = bpy.data.cameras.new("OverviewCamera")
     camera_data.type = "PERSP"
-    camera_data.lens = 48 if args.scene == "overview" else 46
+    camera_data.lens = OVERVIEW_CAMERA_LENS if args.scene == "overview" else DETAIL_CAMERA_LENS
     camera = bpy.data.objects.new("OverviewCamera", camera_data)
     scene.collection.objects.link(camera)
-    if args.scene == "overview":
-        camera.location = (-76, -168, 82)
-        orient_towards(camera, (4, -2, 4))
-    else:
-        camera.location = (0, -138, 46)
-        orient_towards(camera, (0, -2, 4))
+    camera.location = README_CAMERA_LOCATION
+    orient_towards(camera, README_CAMERA_TARGET)
     scene.camera = camera
 
     for name, location, energy, size, color in (
@@ -288,9 +296,9 @@ def build_detail_scene(
         smooth_mesh(obj)
         assign_material(obj, keycap_material)
         if flipped:
-            set_rotation(obj, x_deg=180.0, z_deg=DETAIL_Z_ROTATION_DEG)
+            set_rotation(obj, x_deg=180.0, z_deg=MAIN_Z_ROTATION_DEG)
         else:
-            set_rotation(obj, z_deg=DETAIL_Z_ROTATION_DEG)
+            set_rotation(obj, z_deg=MAIN_Z_ROTATION_DEG)
         center_object(obj, DETAIL_X_POSITIONS[index], DETAIL_OBJECT_Y, SURFACE_Z_OFFSET)
 
         add_flat_text(
