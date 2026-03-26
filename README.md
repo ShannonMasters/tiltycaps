@@ -6,7 +6,7 @@ Current scope:
 
 - Smooth low-profile shell proportions and saddle sculpt
 - DSA-style row variants for `R1` through `R4`, plus a flatter `Thumb` profile
-- A restored `low_profile` toggle, defaulting to the compact low-profile shell
+- A `low_profile` toggle, defaulting to the compact low-profile shell
 - MX or Choc outer spacing, independent of the chosen stem
 - Choc and MX stem options that both hang from the cap interior
 - Optional homing bumps and rings that follow the saddle and row tilt
@@ -16,6 +16,7 @@ Current scope:
 
 - `tiltycaps.scad` - single-file parameter entrypoint and generator source
 - `examples/*.scad` - representative example entrypoints
+- `scripts/generate_stls.py` - batch STL export into a consistent `stls/` directory tree
 - `scripts/validate.py` - STL export and mesh sanity checks
 
 ## Quick Start
@@ -66,9 +67,15 @@ openscad -o out/r3-tall-choc.stl \
 Export an `R3` cap with a three-dot homing marker:
 
 ```bash
-openscad -o out/r3-homing-3dots.stl \
+openscad -o out/r3-homing-3-dots.stl \
   -D 'homing_type="3 dots"' \
   tiltycaps.scad
+```
+
+Generate the full print-mode STL set under `stls/`:
+
+```bash
+python3 scripts/generate_stls.py
 ```
 
 Preview the print pose explicitly:
@@ -98,6 +105,40 @@ openscad -D 'render_mode="print"' tiltycaps.scad
 - `examples/thumb-row-variant.scad` - flatter `Thumb` row geometry for thumb clusters
 - `examples/mx-stem.scad` - default shell with the MX stem support
 - `examples/print-pose.scad` - print-pose helper on the default shell
+
+## Batch STL Export
+
+Run the batch export script to generate the default low-profile keycap set in `render_mode="print"`:
+
+```bash
+python3 scripts/generate_stls.py
+```
+
+By default it writes into `stls/` and creates four subdirectories:
+
+- `stls/choc-spacing-choc-stem/`
+- `stls/choc-spacing-mx-stem/`
+- `stls/mx-spacing-choc-stem/`
+- `stls/mx-spacing-mx-stem/`
+
+Each subdirectory contains the same consistently named STL set:
+
+- `r1.stl`
+- `r2.stl`
+- `r3.stl`
+- `r4.stl`
+- `thumb.stl`
+- `r3-homing-dot.stl`
+- `r3-homing-2-dots.stl`
+- `r3-homing-3-dots.stl`
+- `r3-homing-circle.stl`
+- `r3-homing-line.stl`
+
+The script always exports the print-pose geometry and overwrites matching STL filenames on rerun. To target a different output location, pass `--output-dir`:
+
+```bash
+python3 scripts/generate_stls.py --output-dir out/stls
+```
 
 ## Validation
 
