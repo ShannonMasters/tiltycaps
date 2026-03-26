@@ -142,7 +142,7 @@ function shell_width_trim_mm(low_profile) = low_profile ? 2.40 : 1.70;
 function shell_depth_trim_mm(low_profile) = low_profile ? 2.40 : 1.50;
 function shell_width_mm(low_profile, outer_family) = base_cap_width_mm(1, outer_family) - shell_width_trim_mm(low_profile);
 function shell_depth_mm(low_profile, outer_family) = base_cap_depth_mm(outer_family) - shell_depth_trim_mm(low_profile);
-function shell_height_scale() = 1.20;
+function shell_height_scale() = 1.44;
 function shell_height_mm(row, low_profile) =
     (
         (low_profile ? 4.80 : 6.35)
@@ -153,7 +153,7 @@ function shell_height_mm(row, low_profile) =
            row == "Thumb" ? (low_profile ? -0.08 : 0.00) : 0.06)
     ) * shell_height_scale();
 
-function saddle_depth_scale() = 1.18;
+function saddle_depth_scale() = 1.42;
 function saddle_depth_mm(row, low_profile) =
     (low_profile ? 1.42 : 1.18)
     * (row == "R1" ? 0.94 :
@@ -207,7 +207,9 @@ function bottom_lip_inset_mm(low_profile) = low_profile ? [0.00, 1.06] : [0.00, 
 function bottom_lip_radius_trim_mm(low_profile) = low_profile ? 0.54 : 0.44;
 
 function roof_budget_mm(row, low_profile, roof_mm) = roof_mm + saddle_depth_mm(row, low_profile) * 0.82 + (low_profile ? 0.12 : 0.24);
-function stem_attach_z_mm(low_profile) = low_profile ? -1.05 : -1.12;
+function choc_stem_extension_mm() = 0.50;
+function stem_attach_z_mm(low_profile, stem_family = "choc_v1") =
+    (low_profile ? -1.05 : -1.12) - (stem_family == "choc_v1" ? choc_stem_extension_mm() : 0);
 function support_anchor_z(total_height, row, low_profile, roof_mm) = total_height - roof_budget_mm(row, low_profile, roof_mm) - 0.08;
 function cavity_top_z_mm(row, low_profile, stem_family, roof_mm) =
     let(total_height = shell_height_mm(row, low_profile))
@@ -217,9 +219,9 @@ function cavity_top_z_mm(row, low_profile, stem_family, roof_mm) =
     );
 function stem_body_height_mm(low_profile, stem_family) =
     low_profile
-    ? (stem_family == "mx" ? 3.25 : 3.38)
-    : (stem_family == "mx" ? 2.35 : 2.55);
-function roof_drop_bottom_z(low_profile, stem_family) = stem_attach_z_mm(low_profile) + stem_body_height_mm(low_profile, stem_family);
+    ? (stem_family == "mx" ? 3.25 : 3.38 + choc_stem_extension_mm())
+    : (stem_family == "mx" ? 2.35 : 2.55 + choc_stem_extension_mm());
+function roof_drop_bottom_z(low_profile, stem_family) = stem_attach_z_mm(low_profile, stem_family) + stem_body_height_mm(low_profile, stem_family);
 function stem_shell_overlap_mm(low_profile) = low_profile ? 0.42 : 0.34;
 function stem_front_y_mm(low_profile, stem_family, clearance_mm) =
     stem_family == "mx"
@@ -276,7 +278,7 @@ function print_contact_lift_mm(print_angle_deg, row, low_profile, outer_family, 
         anchor_y = -outer_section_size(anchor_idx, row, low_profile, outer_family)[1] / 2,
         lip_z = bottom_lip_low_z_mm(),
         anchor_low_z = anchor_z - section_thickness_mm(anchor_idx) / 2,
-        stem_low_z = stem_attach_z_mm(low_profile),
+        stem_low_z = stem_attach_z_mm(low_profile, stem_family),
         stem_front_y = low_profile ? -stem_front_y_mm(low_profile, stem_family, clearance_mm) : 0,
         contact_z = min(
             rotated_z_mm(lip_y, lip_z, print_angle_deg),
@@ -404,24 +406,24 @@ module saddle_cut(row, overall_tilt_deg, low_profile, outer_family) {
         max(4.4, top_size[0] - saddle_rim * 2),
         max(4.4, top_size[1] - saddle_rim * 2)
     ];
-    thumb_bowl_scale = row == "Thumb" ? [1.08, 1.16, 0.88] : [1.00, 1.00, 1.00];
+    thumb_bowl_scale = row == "Thumb" ? [1.02, 1.08, 1.02] : [1.00, 1.00, 1.00];
 
     translate([0, top_shift * 0.98, total_height + saddle_mm * 0.01])
         rotate([tilt_deg * 0.44, 0, 0])
             union() {
-                scale([bowl_size[0] * 0.92 * thumb_bowl_scale[0], bowl_size[1] * 1.22 * thumb_bowl_scale[1], saddle_mm * 1.24 * thumb_bowl_scale[2]])
+                scale([bowl_size[0] * 0.84 * thumb_bowl_scale[0], bowl_size[1] * 1.08 * thumb_bowl_scale[1], saddle_mm * 1.52 * thumb_bowl_scale[2]])
                     sphere(r = 1, $fn = 72);
 
-                translate([0, 0, -saddle_mm * 0.08])
-                    scale([bowl_size[0] * 1.28 * thumb_bowl_scale[0], bowl_size[1] * 0.78 * thumb_bowl_scale[1], saddle_mm * 0.70 * thumb_bowl_scale[2]])
+                translate([0, 0, -saddle_mm * 0.14])
+                    scale([bowl_size[0] * 1.18 * thumb_bowl_scale[0], bowl_size[1] * 0.70 * thumb_bowl_scale[1], saddle_mm * 0.92 * thumb_bowl_scale[2]])
                         sphere(r = 1, $fn = 72);
 
-                translate([0, top_size[1] * 0.01, -saddle_mm * 0.03])
-                    scale([bowl_size[0] * 0.96 * thumb_bowl_scale[0], bowl_size[1] * 1.34 * thumb_bowl_scale[1], saddle_mm * 0.40 * thumb_bowl_scale[2]])
+                translate([0, top_size[1] * 0.02, -saddle_mm * 0.08])
+                    scale([bowl_size[0] * 0.90 * thumb_bowl_scale[0], bowl_size[1] * 1.18 * thumb_bowl_scale[1], saddle_mm * 0.56 * thumb_bowl_scale[2]])
                         sphere(r = 1, $fn = 72);
 
-                translate([0, 0, saddle_mm * 0.08])
-                    scale([bowl_size[0] * 1.18 * thumb_bowl_scale[0], bowl_size[1] * 0.94 * thumb_bowl_scale[1], saddle_mm * 0.34 * thumb_bowl_scale[2]])
+                translate([0, 0, saddle_mm * 0.02])
+                    scale([bowl_size[0] * 1.08 * thumb_bowl_scale[0], bowl_size[1] * 0.88 * thumb_bowl_scale[1], saddle_mm * 0.42 * thumb_bowl_scale[2]])
                         sphere(r = 1, $fn = 72);
             }
 }
@@ -523,7 +525,7 @@ module choc_stem_boss(clearance_mm, low_profile) {
 }
 
 module stem_support(low_profile, stem_family, clearance_mm) {
-    attach_z = stem_attach_z_mm(low_profile);
+    attach_z = stem_attach_z_mm(low_profile, stem_family);
 
     translate([0, 0, attach_z])
         if (stem_family == "mx") {
